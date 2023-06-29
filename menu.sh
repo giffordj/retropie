@@ -25,7 +25,7 @@ function text_seperator {
 function center_text {
   text=$1
   printf "!%*s" $(( (${#text} + ${WIDTH}) / 2)) "$text"
-  if [ `expr ${#text} % 2` == 0 ]; then
+  if [[ `expr ${#text} % 2` == 0 ]]; then
     printf "%*s!\n" $(( (${#text} - (${WIDTH} - 3)) / 2)) ""
   else
     printf "%*s!\n" $(( (${#text} - (${WIDTH} - 2)) / 2)) ""
@@ -47,7 +47,7 @@ function install {
     echo -e "Checking Files in:\t$file_emulator"
     IFS=$'\n'
     for check_file in $(cat $file | grep -oP "(?<=<path>)[^<]+" | cut -c 3-); do
-      if [ -e $file_emulator/$check_file ]; then
+      if [[ -e $file_emulator/$check_file ]]; then
         echo -e "File Exists:\t\t$check_file"
         continue
       else
@@ -55,25 +55,39 @@ function install {
         xml_path=$(grep -oPm1 "(?<=<path>)[^<]+" $file | cut -c 3-)
         xml_image=$(grep -oPm1 "(?<=<image>)[^<]+" $file | cut -c 3-)
         xml_video=$(grep -oPm1 "(?<=<video>)[^<]+" $file | cut -c 3-)
-        if [ -e $source_dir/$file_emulator/$xml_path ] ; then
-          cp $source_dir/$file_emulator/$xml_path $file_emulator/$xml_path
+        if [[ -n "$xml_path" ]]; then
+          if [[ -e "$source_dir/$file_emulator/$xml_path" ]] ; then
+            cp "$source_dir/$file_emulator/$xml_path" $file_emulator/
+          else
+            echo -e "ROM File:\t\tMissing"
+            echo -e "Skipping:\t\t$xml_path"
+            continue
+          fi
         else
-          echo -e "ROM File:\t\tMissing"
-          echo -e "Skipping:\t\t$xml_path"
-          continue
+           echo -e "XML Error:\t\tpath is missing"
+           echo -e "Skipping:\t\t$xml_path"
+           continue
         fi
-        if [ -e $source_dir/$file_emulator/$xml_image ] ; then
-          cp $source_dir/$file_emulator/$xml_image $file_emulator/$xml_image
+        if [[ -n "$xml_image" ]]; then
+          if [[ -e "$source_dir/$file_emulator/$xml_image" ]] ; then
+            cp "$source_dir/$file_emulator/$xml_image" $file_emulator/
+          fi
+        else
+           echo -e "XML Error:\t\timage is missing"
         fi
-        if [ -e $source_dir/$file_emulator/$xml_video ] ; then
-          cp $source_dir/$file_emulator/$xml_video $file_emulator/$xml_video
+        if [[ -n "$xml_video" ]]; then
+          if [[ -e "$source_dir/$file_emulator/$xml_video" ]] ; then
+            cp "$source_dir/$file_emulator/$xml_video" $file_emulator/
+          fi
+        else
+           echo -e "XML Error:\t\tvideo is missing"
         fi
         echo -e "Updating Gamelist:\t$rom_dir"
         #
         # Make a backup of the backup in case to revert
         #
         echo -e "Backing up Gamelist:\tOriginal"
-        if ! [ -e $file_emulator/gamelist.xml.orig ]; then
+        if ! [[ -e $file_emulator/gamelist.xml.orig ]]; then
           cp $file_emulator/gamelist.xml $file_emulator/gamelist.xml.orig
         fi
         cp $file_emulator/gamelist.xml $file_emulator/gamelist.xml.temp
@@ -165,4 +179,3 @@ WIDTH=80
 # Start Menu
 #
 main_menu
-
