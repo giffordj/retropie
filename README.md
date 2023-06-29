@@ -1,4 +1,3 @@
-# retropie
 Retropie Script
 
 This script in combination with a USB Drive will install new games into Retropie.
